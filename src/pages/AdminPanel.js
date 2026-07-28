@@ -8,6 +8,9 @@ export default function AdminPanel() {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [imageUrl, setImageUrl] = useState('');
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState('');
+    const [uploading, setUploading] = useState(false);
     const [qualities, setQualities] = useState('');
     const [message, setMessage] = useState('');
     const [bookings, setBookings] = useState([]);
@@ -22,23 +25,53 @@ export default function AdminPanel() {
         api.get('/bookings').then((res) => setBookings(res.data));
     }
 
+    function handleFileChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+    }
+
     async function handleAddTemplate(e) {
         e.preventDefault();
         setMessage('');
+
+        if (!imageFile) {
+            setMessage('Please choose an image to upload.');
+            return;
+        }
+
         try {
+            setUploading(true);
+
+            // Step 1: upload the image file to Cloudinary via backend
+            const formData = new FormData();
+            formData.append('image', imageFile);
+            const uploadRes = await api.post('/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const uploadedUrl = uploadRes.data.imageUrl;
+            setImageUrl(uploadedUrl);
+
+            // Step 2: create the template using the uploaded image URL
             await api.post('/templates', {
                 name,
                 description,
-                imageUrl,
+                imageUrl: uploadedUrl,
                 qualities: qualities.split(',').map((q) => q.trim()).filter(Boolean)
             });
+
             setMessage('Template added.');
             setName('');
             setDescription('');
             setImageUrl('');
+            setImageFile(null);
+            setImagePreview('');
             setQualities('');
         } catch (err) {
             setMessage(err.response?.data?.message || 'Something went wrong');
+        } finally {
+            setUploading(false);
         }
     }
 
@@ -62,18 +95,28 @@ export default function AdminPanel() {
                         onChange={(e) => setDescription(e.target.value)} required rows={3}
                         className="w-full border border-slate-300 rounded-lg px-4 py-2"
                     />
-                    <input
-                        type="text" placeholder="Image URL" value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)} required
-                        className="w-full border border-slate-300 rounded-lg px-4 py-2"
-                    />
+                    <div>
+                        <label className="block text-sm text-slate-600 mb-1">Template Image</label>
+                        <input
+                            type="file" accept="image/*"
+                            onChange={handleFileChange}
+                            className="w-full border border-slate-300 rounded-lg px-4 py-2 bg-white"
+                        />
+                        {imagePreview && (
+                            <img
+                                src={imagePreview}
+                                alt="Preview"
+                                className="mt-3 w-40 h-40 object-cover rounded-lg border border-slate-200"
+                            />
+                        )}
+                    </div>
                     <input
                         type="text" placeholder="Qualities, comma separated (e.g. ATS-friendly, 1-page)"
                         value={qualities} onChange={(e) => setQualities(e.target.value)}
                         className="w-full border border-slate-300 rounded-lg px-4 py-2"
                     />
-                    <button type="submit" className="bg-slate-800 text-white px-6 py-2 rounded-lg hover:bg-slate-700">
-                        Add Template
+                    <button type="submit" disabled={uploading} className="bg-slate-800 text-white px-6 py-2 rounded-lg hover:bg-slate-700 disabled:opacity-50">
+                        {uploading ? 'Uploading...' : 'Add Template'}
                     </button>
                 </form>
             </section>
