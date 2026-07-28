@@ -7,7 +7,11 @@ export default function TemplateCard({ template }) {
             to={`/templates/${template._id}`}
             className="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden block"
         >
-            <img src={template.imageUrl} alt={template.name} className="w-full h-56 object-cover" />
+            <img
+                src={template.imageUrl}
+                alt={template.name}
+                className="w-full h-80 object-contain bg-slate-100"
+            />
             <div className="p-4">
                 <h3 className="font-semibold text-slate-800">{template.name}</h3>
                 <div className="flex flex-wrap gap-2 mt-2">

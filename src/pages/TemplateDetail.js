@@ -42,7 +42,7 @@ export default function TemplateDetail() {
 
     return (
         <div className="max-w-3xl mx-auto px-6 py-12">
-            <img src={template.imageUrl} alt={template.name} className="w-full max-h-[500px] object-cover rounded-xl mb-6" />
+            <img src={template.imageUrl} alt={template.name} className="w-full max-h-[800px] object-contain bg-slate-100 rounded-xl mb-6" />
             <h1 className="text-2xl font-bold text-slate-800 mb-2">{template.name}</h1>
             <div className="flex flex-wrap gap-2 mb-4">
                 {(template.qualities || []).map((q, i) => (
