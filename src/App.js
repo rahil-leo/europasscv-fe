@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import TemplateDetail from './pages/TemplateDetail';
 import Login from './pages/Login';
@@ -18,6 +19,7 @@ export default function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/admin" element={<AdminPanel />} />
                 </Routes>
+                <Footer />
             </BrowserRouter>
         </AuthProvider>
     );
