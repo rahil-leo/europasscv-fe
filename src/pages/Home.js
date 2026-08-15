@@ -4,9 +4,13 @@ import TemplateCard from '../components/TemplateCard';
 
 export default function Home() {
     const [templates, setTemplates] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        api.get('/templates').then((res) => setTemplates(res.data));
+        api.get('/templates')
+            .then((res) => setTemplates(res.data))
+            .catch(() => {}) // silently handle — show empty state
+            .finally(() => setLoading(false));
     }, []);
 
     return (
@@ -32,7 +36,22 @@ export default function Home() {
             >
                 <div className="max-w-6xl mx-auto px-6 py-12">
                     <h2 className="text-2xl font-semibold text-slate-800 mb-6">Templates</h2>
-                    {templates.length === 0 ? (
+                    {loading ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse">
+                                    <div className="w-full h-80 bg-slate-200" />
+                                    <div className="p-4 space-y-2">
+                                        <div className="h-4 bg-slate-200 rounded w-3/4" />
+                                        <div className="flex gap-2">
+                                            <div className="h-3 bg-slate-100 rounded-full w-16" />
+                                            <div className="h-3 bg-slate-100 rounded-full w-12" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : templates.length === 0 ? (
                         <p className="text-slate-500">No templates added yet.</p>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

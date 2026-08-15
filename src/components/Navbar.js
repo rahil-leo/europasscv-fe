@@ -21,7 +21,7 @@ export default function Navbar() {
         <nav className="sticky top-0 z-50 px-6 py-4 shadow-sm bg-white">
             <div className="flex items-center justify-between">
                 <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
-                    <img src="/images/logo.Png" alt="Logo" className="h-8 w-auto rounded" />
+                    <img src="/images/Logo.png" alt="Logo" className="h-8 w-auto rounded" />
                     <span className="text-xl font-bold text-slate-800">Europass.cv</span>
                 </Link>
 
