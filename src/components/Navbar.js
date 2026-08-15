@@ -28,6 +28,9 @@ export default function Navbar() {
                 {/* Desktop links */}
                 <div className="hidden md:flex items-center gap-4">
                     <Link to="/" className="text-slate-600 hover:text-slate-900">Templates</Link>
+                    {user && (
+                        <Link to="/my-bookings" className="text-slate-600 hover:text-slate-900">My Bookings</Link>
+                    )}
                     {user?.role === 'admin' && (
                         <Link to="/admin" className="text-slate-600 hover:text-slate-900">Admin Panel</Link>
                     )}
@@ -65,6 +68,9 @@ export default function Navbar() {
             {menuOpen && (
                 <div className="md:hidden mt-4 flex flex-col gap-3 pb-2">
                     <Link to="/" onClick={closeMenu} className="text-slate-600 hover:text-slate-900">Templates</Link>
+                    {user && (
+                        <Link to="/my-bookings" onClick={closeMenu} className="text-slate-600 hover:text-slate-900">My Bookings</Link>
+                    )}
                     {user?.role === 'admin' && (
                         <Link to="/admin" onClick={closeMenu} className="text-slate-600 hover:text-slate-900">Admin Panel</Link>
                     )}

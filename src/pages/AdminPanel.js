@@ -39,6 +39,17 @@ export default function AdminPanel() {
         api.get('/bookings').then((res) => setBookings(res.data));
     }
 
+    async function toggleBookingStatus(id) {
+        try {
+            const res = await api.patch(`/bookings/${id}/status`);
+            setBookings((prev) =>
+                prev.map((b) => (b._id === id ? res.data : b))
+            );
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to update booking status');
+        }
+    }
+
     function handleFileChange(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -262,6 +273,7 @@ export default function AdminPanel() {
                                         <th className="py-2 pr-4">Phone</th>
                                         <th className="py-2 pr-4">Notes</th>
                                         <th className="py-2 pr-4">Status</th>
+                                        <th className="py-2 pr-4">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -271,7 +283,23 @@ export default function AdminPanel() {
                                             <td className="py-2 pr-4">{b.user?.name} ({b.user?.email})</td>
                                             <td className="py-2 pr-4">{b.phone}</td>
                                             <td className="py-2 pr-4">{b.notes || '-'}</td>
-                                            <td className="py-2 pr-4">{b.status}</td>
+                                            <td className="py-2 pr-4">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                    b.status === 'done'
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-yellow-100 text-yellow-800'
+                                                }`}>
+                                                    {b.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-2 pr-4">
+                                                <button
+                                                    onClick={() => toggleBookingStatus(b._id)}
+                                                    className="text-xs px-2.5 py-1 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100"
+                                                >
+                                                    {b.status === 'done' ? 'Mark Pending' : 'Mark Done'}
+                                                </button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
