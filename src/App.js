@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
 import MyBookings from './pages/MyBookings';
 import Feedback from './pages/Feedback';
+import WhatsAppButton from './components/WhatsAppButton';
 
 export default function App() {
     return (
@@ -24,6 +25,7 @@ export default function App() {
                     <Route path="/feedback" element={<Feedback />} />
                 </Routes>
                 <Footer />
+                <WhatsAppButton />
             </BrowserRouter>
         </AuthProvider>
     );
