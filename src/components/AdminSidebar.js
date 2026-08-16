@@ -3,7 +3,8 @@ import React from 'react';
 const TABS = [
     { key: 'add', label: 'Add Template' },
     { key: 'templates', label: 'Templates' },
-    { key: 'bookings', label: 'Bookings' }
+    { key: 'bookings', label: 'Bookings' },
+    { key: 'testimonials', label: 'Testimonials' }
 ];
 
 export default function AdminSidebar({ activeTab, onTabChange }) {

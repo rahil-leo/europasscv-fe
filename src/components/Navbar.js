@@ -31,6 +31,7 @@ export default function Navbar() {
                     {user && (
                         <Link to="/my-bookings" className="text-slate-600 hover:text-slate-900">My Bookings</Link>
                     )}
+                    <Link to="/feedback" className="text-slate-600 hover:text-slate-900">Feedback</Link>
                     {user?.role === 'admin' && (
                         <Link to="/admin" className="text-slate-600 hover:text-slate-900">Admin Panel</Link>
                     )}
@@ -71,6 +72,7 @@ export default function Navbar() {
                     {user && (
                         <Link to="/my-bookings" onClick={closeMenu} className="text-slate-600 hover:text-slate-900">My Bookings</Link>
                     )}
+                    <Link to="/feedback" onClick={closeMenu} className="text-slate-600 hover:text-slate-900">Feedback</Link>
                     {user?.role === 'admin' && (
                         <Link to="/admin" onClick={closeMenu} className="text-slate-600 hover:text-slate-900">Admin Panel</Link>
                     )}

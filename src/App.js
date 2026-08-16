@@ -8,6 +8,7 @@ import TemplateDetail from './pages/TemplateDetail';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
 import MyBookings from './pages/MyBookings';
+import Feedback from './pages/Feedback';
 
 export default function App() {
     return (
@@ -20,6 +21,7 @@ export default function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/admin" element={<AdminPanel />} />
                     <Route path="/my-bookings" element={<MyBookings />} />
+                    <Route path="/feedback" element={<Feedback />} />
                 </Routes>
                 <Footer />
             </BrowserRouter>

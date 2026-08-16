@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import api from '../api/api';
 import TemplateCard from '../components/TemplateCard';
+import Testimonials from '../components/Testimonials';
 
 export default function Home() {
     const [templates, setTemplates] = useState([]);
@@ -160,6 +161,7 @@ export default function Home() {
                     )}
                 </div>
             </section>
+            <Testimonials />
         </div>
     );
 }

@@ -23,16 +23,43 @@ export default function AdminPanel() {
     // Data lists
     const [templates, setTemplates] = useState([]);
     const [bookings, setBookings] = useState([]);
+    const [pendingTestimonials, setPendingTestimonials] = useState([]);
+    const [approvedTestimonials, setApprovedTestimonials] = useState([]);
 
     useEffect(() => {
         if (user?.role === 'admin') {
             loadTemplates();
             loadBookings();
+            loadTestimonials();
         }
     }, [user]);
 
     function loadTemplates() {
         api.get('/templates').then((res) => setTemplates(res.data));
+    }
+
+    function loadTestimonials() {
+        api.get('/testimonials/pending').then((res) => setPendingTestimonials(res.data));
+        api.get('/testimonials').then((res) => setApprovedTestimonials(res.data));
+    }
+
+    async function handleApproveTestimonial(id) {
+        try {
+            await api.patch(`/testimonials/${id}/approve`);
+            loadTestimonials();
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to approve testimonial');
+        }
+    }
+
+    async function handleDeleteTestimonial(id) {
+        if (!window.confirm('Are you sure you want to delete this testimonial?')) return;
+        try {
+            await api.delete(`/testimonials/${id}`);
+            loadTestimonials();
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to delete testimonial');
+        }
     }
 
     function loadBookings() {
@@ -305,6 +332,78 @@ export default function AdminPanel() {
                                 </tbody>
                             </table>
                         )}
+                    </section>
+                )}
+
+                {activeTab === 'testimonials' && (
+                    <section className="space-y-8">
+                        <div>
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4">Pending Testimonials</h2>
+                            {pendingTestimonials.length === 0 ? (
+                                <p className="text-slate-500 text-sm">No pending testimonials.</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {pendingTestimonials.map((t) => (
+                                        <div key={t._id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fadeIn">
+                                            <div className="space-y-1">
+                                                <div className="flex text-amber-400 text-sm">
+                                                    {Array.from({ length: t.rating }).map((_, i) => <span key={i}>★</span>)}
+                                                    {Array.from({ length: 5 - t.rating }).map((_, i) => <span key={i} className="text-slate-200">★</span>)}
+                                                </div>
+                                                <p className="text-slate-600 italic text-sm">"{t.quote}"</p>
+                                                <p className="text-xs text-slate-500">— {t.user?.name} ({t.user?.email})</p>
+                                            </div>
+                                            <div className="flex gap-2 shrink-0">
+                                                <button
+                                                    onClick={() => handleApproveTestimonial(t._id)}
+                                                    className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-medium"
+                                                >
+                                                    Approve
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteTestimonial(t._id)}
+                                                    className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-650 hover:bg-red-50 text-red-600"
+                                                >
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <hr className="border-slate-100" />
+
+                        <div>
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4">Approved Testimonials</h2>
+                            {approvedTestimonials.length === 0 ? (
+                                <p className="text-slate-500 text-sm">No approved testimonials.</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {approvedTestimonials.map((t) => (
+                                        <div key={t._id} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                            <div className="space-y-1">
+                                                <div className="flex text-amber-400 text-sm">
+                                                    {Array.from({ length: t.rating }).map((_, i) => <span key={i}>★</span>)}
+                                                    {Array.from({ length: 5 - t.rating }).map((_, i) => <span key={i} className="text-slate-200">★</span>)}
+                                                </div>
+                                                <p className="text-slate-600 italic text-sm">"{t.quote}"</p>
+                                                <p className="text-xs text-slate-500">— {t.user?.name || 'Anonymous'}</p>
+                                            </div>
+                                            <div className="flex gap-2 shrink-0">
+                                                <button
+                                                    onClick={() => handleDeleteTestimonial(t._id)}
+                                                    className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </section>
                 )}
             </div>

@@ -53,14 +53,25 @@ export default function TemplateDetail() {
 
             {message && <p className="mb-4 text-sm text-slate-700 bg-slate-100 px-4 py-2 rounded-lg">{message}</p>}
 
-            {!showForm && (
-                <button
-                    onClick={handleBookClick}
-                    className="bg-slate-800 text-white px-6 py-3 rounded-lg hover:bg-slate-700"
-                >
-                    Book this Template
-                </button>
-            )}
+            <div className="flex gap-3">
+    {!showForm && (
+        <button
+            onClick={handleBookClick}
+            className="bg-slate-800 text-white px-6 py-3 rounded-lg hover:bg-slate-700"
+        >
+            Book this Template
+        </button>
+    )}
+
+    <a
+        href="https://docs.google.com/forms/d/e/1FAIpQLSd-3aSsXn1BvgGJyRP0Z4HcFpQJLVAggCX64dLaoQAPvMpIIA/viewform?usp=publish-editor"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="border border-slate-800 text-slate-800 px-6 py-3 rounded-lg hover:bg-slate-100"
+    >
+        Fill Interest Form
+    </a>
+</div>
 
             {showForm && (
                 <form onSubmit={handleSubmit} className="space-y-4 mt-4">
