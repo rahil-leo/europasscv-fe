@@ -19,6 +19,7 @@ export default function AdminPanel() {
     const [uploading, setUploading] = useState(false);
     const [qualities, setQualities] = useState('');
     const [message, setMessage] = useState('');
+    const [price, setPrice] = useState('');
 
     // Data lists
     const [templates, setTemplates] = useState([]);
@@ -92,6 +93,7 @@ export default function AdminPanel() {
         setImageFile(null);
         setImagePreview('');
         setQualities('');
+        setPrice('');
     }
 
     function startEdit(t) {
@@ -102,6 +104,7 @@ export default function AdminPanel() {
         setImagePreview(t.imageUrl);
         setImageFile(null);
         setQualities((t.qualities || []).join(', '));
+        setPrice(t.price || '');
         setMessage('');
         setActiveTab('add');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -147,6 +150,7 @@ export default function AdminPanel() {
                 name,
                 description,
                 imageUrl: finalImageUrl,
+                price,
                 qualities: qualities.split(',').map((q) => q.trim()).filter(Boolean)
             };
 
@@ -213,6 +217,11 @@ export default function AdminPanel() {
                                 )}
                             </div>
                             <input
+                                type="number" placeholder="Price (e.g. 299)" value={price}
+                                onChange={(e) => setPrice(e.target.value)} required
+                                className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                            />
+                            <input
                                 type="text" placeholder="Qualities, comma separated (e.g. ATS-friendly, 1-page)"
                                 value={qualities} onChange={(e) => setQualities(e.target.value)}
                                 className="w-full border border-slate-300 rounded-lg px-4 py-2"
@@ -257,6 +266,7 @@ export default function AdminPanel() {
                                         />
                                         <div className="p-4">
                                             <h3 className="font-semibold text-slate-800">{t.name}</h3>
+                                            <p className="text-slate-600 text-sm mb-2">₹{t.price}</p>
                                             <div className="flex flex-wrap gap-2 mt-2 mb-4">
                                                 {(t.qualities || []).slice(0, 3).map((q, i) => (
                                                     <span key={i} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">

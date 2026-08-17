@@ -52,7 +52,7 @@ export default function Home() {
     return (
         <div>
             <section
-                className="relative text-white text-center py-20 px-6 bg-cover bg-center"
+                className="relative text-white text-center py-32 px-6 bg-cover bg-center"
                 style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
             >
                 <div className="absolute inset-0 bg-slate-900/60"></div>
@@ -68,7 +68,7 @@ export default function Home() {
             <section
                 id="templates"
                 className="bg-cover bg-center bg-fixed"
-                style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)), url('/images/template1.jpg')" }}
+                style={{ backgroundImage: "linear-gradient(rgba(236, 230, 230, 0.12), rgba(233, 224, 224, 0.12)), url('/images/template1.jpg')" }}
             >
                 <div className="max-w-6xl mx-auto px-6 py-12">
                     {/* Header + Search bar container */}
