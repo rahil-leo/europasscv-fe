@@ -1,10 +1,11 @@
 import React, { useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 export default function Navbar() {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
+    const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
 
     function handleLogout() {
@@ -17,6 +18,13 @@ export default function Navbar() {
         setMenuOpen(false);
     }
 
+    function navLinkClass(path) {
+        const isActive = location.pathname === path;
+        return isActive
+            ? 'text-slate-900 font-semibold border-b-2 border-slate-800'
+            : 'text-slate-600 hover:text-slate-900';
+    }
+
     return (
         <nav className="sticky top-0 z-50 px-6 py-4 shadow-sm bg-white">
             <div className="flex items-center justify-between">
@@ -27,13 +35,13 @@ export default function Navbar() {
 
                 {/* Desktop links */}
                 <div className="hidden md:flex items-center gap-4">
-                    <Link to="/" className="text-slate-600 hover:text-slate-900">Templates</Link>
+                    <Link to="/" className={navLinkClass('/')}>Templates</Link>
                     {user && (
-                        <Link to="/my-bookings" className="text-slate-600 hover:text-slate-900">My Bookings</Link>
+                        <Link to="/my-bookings" className={navLinkClass('/my-bookings')}>My Bookings</Link>
                     )}
-                    <Link to="/feedback" className="text-slate-600 hover:text-slate-900">Feedback</Link>
+                    <Link to="/feedback" className={navLinkClass('/feedback')}>Feedback</Link>
                     {user?.role === 'admin' && (
-                        <Link to="/admin" className="text-slate-600 hover:text-slate-900">Admin Panel</Link>
+                        <Link to="/admin" className={navLinkClass('/admin')}>Admin Panel</Link>
                     )}
                     {user ? (
                         <div className="flex items-center gap-3">
@@ -68,13 +76,13 @@ export default function Navbar() {
             {/* Mobile dropdown menu */}
             {menuOpen && (
                 <div className="md:hidden mt-4 flex flex-col gap-3 pb-2">
-                    <Link to="/" onClick={closeMenu} className="text-slate-600 hover:text-slate-900">Templates</Link>
+                    <Link to="/" onClick={closeMenu} className={navLinkClass('/')}>Templates</Link>
                     {user && (
-                        <Link to="/my-bookings" onClick={closeMenu} className="text-slate-600 hover:text-slate-900">My Bookings</Link>
+                        <Link to="/my-bookings" onClick={closeMenu} className={navLinkClass('/my-bookings')}>My Bookings</Link>
                     )}
-                    <Link to="/feedback" onClick={closeMenu} className="text-slate-600 hover:text-slate-900">Feedback</Link>
+                    <Link to="/feedback" onClick={closeMenu} className={navLinkClass('/feedback')}>Feedback</Link>
                     {user?.role === 'admin' && (
-                        <Link to="/admin" onClick={closeMenu} className="text-slate-600 hover:text-slate-900">Admin Panel</Link>
+                        <Link to="/admin" onClick={closeMenu} className={navLinkClass('/admin')}>Admin Panel</Link>
                     )}
                     {user ? (
                         <>
