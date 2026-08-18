@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
@@ -7,6 +7,15 @@ export default function Navbar() {
     const navigate = useNavigate();
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        function handleScroll() {
+            setScrolled(window.scrollY > 10);
+        }
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     function handleLogout() {
         logout();
@@ -26,7 +35,9 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="sticky top-0 z-50 px-6 py-4 shadow-sm bg-white">
+        <nav className={`sticky top-0 z-50 px-6 py-4 transition-all duration-300 ${
+            scrolled ? 'bg-white/70 backdrop-blur-md shadow-sm' : 'bg-white shadow-sm'
+        }`}>
             <div className="flex items-center justify-between">
                 <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
                     <img src="/images/Logo.png" alt="Logo" className="h-8 w-auto rounded" />
@@ -72,7 +83,7 @@ export default function Navbar() {
                     )}
                 </button>
             </div>
-
+ 
             {/* Mobile dropdown menu */}
             {menuOpen && (
                 <div className="md:hidden mt-4 flex flex-col gap-3 pb-2">
