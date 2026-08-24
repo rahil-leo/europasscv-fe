@@ -1,167 +1,149 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import api from '../api/api';
-import TemplateCard from '../components/TemplateCard';
-import Testimonials from '../components/Testimonials';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-export default function Home() {
-    const [templates, setTemplates] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedTags, setSelectedTags] = useState([]);
+function Home() {
+  const [featuredTemplates, setFeaturedTemplates] = useState([]);
 
-    useEffect(() => {
-        api.get('/templates')
-            .then((res) => setTemplates(res.data))
-            .catch(() => {}) // silently handle — show empty state
-            .finally(() => setLoading(false));
-    }, []);
+  useEffect(() => {
+    let isMounted = true;
 
-    // Dynamically compute all unique tags/qualities from loaded templates
-    const allTags = useMemo(() => {
-        const tagsSet = new Set();
-        templates.forEach((t) => {
-            if (t.qualities && Array.isArray(t.qualities)) {
-                t.qualities.forEach((q) => tagsSet.add(q));
-            }
-        });
-        return Array.from(tagsSet).sort();
-    }, [templates]);
+    fetch("/api/templates")
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted) {
+          setFeaturedTemplates(data.slice(0, 6));
+        }
+      })
+      .catch((err) => console.error("Failed to load templates:", err));
 
-    // Live search and multi-tag filtering (templates must match query AND have ALL selected tags)
-    const filteredTemplates = useMemo(() => {
-        return templates.filter((t) => {
-            const nameMatch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
-            const tagsMatch = selectedTags.every((tag) => t.qualities && t.qualities.includes(tag));
-            return nameMatch && tagsMatch;
-        });
-    }, [templates, searchQuery, selectedTags]);
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-    function toggleTag(tag) {
-        setSelectedTags((prev) =>
-            prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-        );
-    }
+  return (
+    <div
+      className="w-full bg-cover bg-center bg-fixed"
+      style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
+    >
+      {/* Dark overlay covering the whole page so text stays readable everywhere */}
+      <div className="bg-slate-900/70">
+        {/* Hero */}
+        <section className="text-white text-center py-32 px-6">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Professional CV Templates, Ready to Book
+          </h1>
+          <p className="text-lg text-slate-200 mb-8">
+            Browse, pick, and book a professional CV template in minutes.
+          </p>
+          <Link
+            to="/templates"
+            className="inline-block bg-white text-slate-800 px-6 py-3 rounded-lg font-medium hover:bg-slate-100 transition"
+          >
+            Browse Templates
+          </Link>
+        </section>
 
-    function clearFilters() {
-        setSearchQuery('');
-        setSelectedTags([]);
-    }
+        {/* How it works */}
+        <section className="py-16 px-4 max-w-7xl mx-auto bg-white text-black">
+          <h2 className="text-2xl font-semibold text-center mb-10">
+            How It Works
+          </h2>
 
-    const isFiltered = searchQuery !== '' || selectedTags.length > 0;
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div>
+              <div className="text-3xl mb-2">1</div>
+              <p className="font-medium">Browse Templates</p>
+            </div>
 
-    return (
-        <div>
-            <section
-                className="relative text-white text-center py-32 px-6 bg-cover bg-center"
-                style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
-            >
-                <div className="absolute inset-0 bg-slate-900/60"></div>
-                <div className="relative">
-                    <h1 className="text-4xl font-bold mb-4">Find the CV Template That Fits You</h1>
-                    <p className="text-slate-200 mb-6">Simple, professional resume templates — pick one and book it.</p>
-                    <a href="#templates" className="bg-white text-slate-800 px-6 py-3 rounded-lg font-medium hover:bg-slate-100">
-                        Browse Templates
-                    </a>
-                </div>
-            </section>
+            <div>
+              <div className="text-3xl mb-2">2</div>
+              <p className="font-medium">Login & Book</p>
+            </div>
 
-            <section
-                id="templates"
-                className="bg-cover bg-center bg-fixed"
-                style={{ backgroundImage: "linear-gradient(rgba(236, 230, 230, 0.12), rgba(233, 224, 224, 0.12)), url('/images/template1.jpg')" }}
-            >
-                <div className="max-w-6xl mx-auto px-6 py-12">
-                    {/* Header + Search bar container */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                        <h2 className="text-2xl font-semibold text-slate-800">Templates</h2>
-                        
-                        {!loading && templates.length > 0 && (
-                            <div className="relative w-full md:w-80">
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                    <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </span>
-                                <input
-                                    type="text"
-                                    placeholder="Search templates by name..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition shadow-sm"
-                                />
-                            </div>
-                        )}
-                    </div>
+            <div>
+              <div className="text-3xl mb-2">3</div>
+              <p className="font-medium">Get Your Template</p>
+            </div>
+          </div>
+        </section>
 
-                    {/* Tag chips row */}
-                    {!loading && templates.length > 0 && allTags.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2 mb-8 bg-white/50 p-3 rounded-xl border border-slate-100">
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-1">Filter Tags:</span>
-                            {allTags.map((tag) => {
-                                const isActive = selectedTags.includes(tag);
-                                return (
-                                    <button
-                                        key={tag}
-                                        onClick={() => toggleTag(tag)}
-                                        className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
-                                            isActive
-                                                ? 'bg-slate-800 text-white shadow-sm ring-1 ring-slate-900'
-                                                : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
-                                        }`}
-                                    >
-                                        {tag}
-                                    </button>
-                                );
-                            })}
-                            
-                            {isFiltered && (
-                                <button
-                                    onClick={clearFilters}
-                                    className="text-xs font-semibold text-red-500 hover:text-red-700 transition ml-2 hover:underline"
-                                >
-                                    Clear filters
-                                </button>
-                            )}
-                        </div>
-                    )}
+        {/* Featured templates */}
+        {featuredTemplates.length > 0 && (
+          <section className="py-16 px-4 max-w-6xl mx-auto">
+            <h2 className="text-2xl font-semibold text-center mb-10 text-white">
+              Popular Templates
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {featuredTemplates.map((template) => (
+                <Link
+                  key={template._id}
+                  to={`/templates/${template._id}`}
+                  className="border rounded-lg overflow-hidden hover:shadow-lg transition bg-white"
+                >
+                  <img
+                    src={template.imageUrl}
+                    alt={template.name}
+                    loading="lazy"
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-3">
+                    <p className="font-medium">{template.name}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
-                    {loading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse">
-                                    <div className="w-full h-80 bg-slate-200" />
-                                    <div className="p-4 space-y-2">
-                                        <div className="h-4 bg-slate-200 rounded w-3/4" />
-                                        <div className="flex gap-2">
-                                            <div className="h-3 bg-slate-100 rounded-full w-16" />
-                                            <div className="h-3 bg-slate-100 rounded-full w-12" />
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : templates.length === 0 ? (
-                        <p className="text-slate-500">No templates added yet.</p>
-                    ) : filteredTemplates.length === 0 ? (
-                        <div className="text-center py-16 bg-white/40 rounded-2xl border border-slate-100">
-                            <p className="text-slate-500 font-medium mb-2">No templates match your search.</p>
-                            <button
-                                onClick={clearFilters}
-                                className="text-sm text-slate-700 font-semibold hover:underline"
-                            >
-                                Reset search & filters
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredTemplates.map((t) => (
-                                <TemplateCard key={t._id} template={t} />
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </section>
-            <Testimonials />
-        </div>
-    );
+        {/* CTA footer */}
+        <section className="text-center py-16 px-4 text-white">
+          <h2 className="text-2xl font-semibold mb-4">
+            Ready to find your template?
+          </h2>
+          <Link
+            to="/templates"
+            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+          >
+            Browse Now
+          </Link>
+        </section>
+        {/* Why choose us */}
+        <section className="py-16 px-4 max-w-7xl mx-auto bg-white text-black">
+          <h2 className="text-2xl font-semibold text-center mb-10">
+            Why Choose Us
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div>
+              <p className="font-semibold mb-1">Professionally Designed</p>
+              <p className="text-sm text-slate-600">
+                Clean, modern templates built to stand out.
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold mb-1">Quick & Simple</p>
+              <p className="text-sm text-slate-600">
+                Book a template in just a few clicks.
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold mb-1">Wide Variety</p>
+              <p className="text-sm text-slate-600">
+                Styles for every profession and preference.
+              </p>
+            </div>
+          </div>
+        </section>
+
+         <section className="py-16 px-4 max-w-7xl mx-auto bg-transparent text-black">
+
+        </section>
+        
+      </div>
+    </div>
+  );
 }
+export default Home;

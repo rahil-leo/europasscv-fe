@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Home from './pages/Home';
+import Home from "./pages/Home";
+import Templates from './pages/Templates';
 import TemplateDetail from './pages/TemplateDetail';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
@@ -18,6 +19,7 @@ export default function App() {
                 <Navbar />
                 <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/templates" element={<Templates />} />
                     <Route path="/templates/:id" element={<TemplateDetail />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/admin" element={<AdminPanel />} />

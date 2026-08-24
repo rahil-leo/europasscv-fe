@@ -46,7 +46,8 @@ export default function Navbar() {
 
                 {/* Desktop links */}
                 <div className="hidden md:flex items-center gap-4">
-                    <Link to="/" className={navLinkClass('/')}>Templates</Link>
+                    <Link to="/" className={navLinkClass('/')}>Home</Link>
+                    <Link to="/templates" className={navLinkClass('/templates')}>Templates</Link>
                     {user && (
                         <Link to="/my-bookings" className={navLinkClass('/my-bookings')}>My Bookings</Link>
                     )}
@@ -87,7 +88,8 @@ export default function Navbar() {
             {/* Mobile dropdown menu */}
             {menuOpen && (
                 <div className="md:hidden mt-4 flex flex-col gap-3 pb-2">
-                    <Link to="/" onClick={closeMenu} className={navLinkClass('/')}>Templates</Link>
+                    <Link to="/" onClick={closeMenu} className={navLinkClass('/')}>Home</Link>
+                    <Link to="/templates" onClick={closeMenu} className={navLinkClass('/templates')}>Templates</Link>
                     {user && (
                         <Link to="/my-bookings" onClick={closeMenu} className={navLinkClass('/my-bookings')}>My Bookings</Link>
                     )}
