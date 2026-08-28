@@ -4,7 +4,7 @@ export default function WhatsAppButton() {
     return (
         <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
             <a
-                href="https://www.instagram.com/europass_ats?igsh=ZTRpdjVxYm4xMmt2"
+                href="https://www.instagram.com/eurocvstudio?igsh=ZTRpdjVxYm4xMmt2"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 hover:opacity-90 text-white rounded-full p-4 shadow-lg"
