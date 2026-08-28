@@ -11,6 +11,7 @@ import AdminPanel from './pages/AdminPanel';
 import MyBookings from './pages/MyBookings';
 import Feedback from './pages/Feedback';
 import WhatsAppButton from './components/WhatsAppButton';
+import OurWork from './pages/OurWork';
 
 export default function App() {
     return (
@@ -25,6 +26,7 @@ export default function App() {
                     <Route path="/admin" element={<AdminPanel />} />
                     <Route path="/my-bookings" element={<MyBookings />} />
                     <Route path="/feedback" element={<Feedback />} />
+                    <Route path="/our-work" element={<OurWork />} />
                 </Routes>
                 <Footer />
                 <WhatsAppButton />

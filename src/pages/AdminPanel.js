@@ -7,7 +7,7 @@ import AdminSidebar from '../components/AdminSidebar';
 export default function AdminPanel() {
     const { user, loading } = useContext(AuthContext);
 
-    const [activeTab, setActiveTab] = useState('add'); // 'add' | 'templates' | 'bookings'
+    const [activeTab, setActiveTab] = useState('add');
 
     // Add / Edit template form state
     const [editingId, setEditingId] = useState(null);
@@ -21,17 +21,27 @@ export default function AdminPanel() {
     const [message, setMessage] = useState('');
     const [price, setPrice] = useState('');
 
+    // Our Work form state
+    const [workTitle, setWorkTitle] = useState('');
+    const [workDescription, setWorkDescription] = useState('');
+    const [workImageFile, setWorkImageFile] = useState(null);
+    const [workImagePreview, setWorkImagePreview] = useState('');
+    const [workUploading, setWorkUploading] = useState(false);
+    const [workMessage, setWorkMessage] = useState('');
+
     // Data lists
     const [templates, setTemplates] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [pendingTestimonials, setPendingTestimonials] = useState([]);
     const [approvedTestimonials, setApprovedTestimonials] = useState([]);
+    const [workItems, setWorkItems] = useState([]);
 
     useEffect(() => {
         if (user?.role === 'admin') {
             loadTemplates();
             loadBookings();
             loadTestimonials();
+            loadWork();
         }
     }, [user]);
 
@@ -42,6 +52,10 @@ export default function AdminPanel() {
     function loadTestimonials() {
         api.get('/testimonials/pending').then((res) => setPendingTestimonials(res.data));
         api.get('/testimonials').then((res) => setApprovedTestimonials(res.data));
+    }
+
+    function loadWork() {
+        api.get('/work').then((res) => setWorkItems(res.data));
     }
 
     async function handleApproveTestimonial(id) {
@@ -85,6 +99,13 @@ export default function AdminPanel() {
         setImagePreview(URL.createObjectURL(file));
     }
 
+    function handleWorkFileChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        setWorkImageFile(file);
+        setWorkImagePreview(URL.createObjectURL(file));
+    }
+
     function resetForm() {
         setEditingId(null);
         setName('');
@@ -94,6 +115,13 @@ export default function AdminPanel() {
         setImagePreview('');
         setQualities('');
         setPrice('');
+    }
+
+    function resetWorkForm() {
+        setWorkTitle('');
+        setWorkDescription('');
+        setWorkImageFile(null);
+        setWorkImagePreview('');
     }
 
     function startEdit(t) {
@@ -121,6 +149,16 @@ export default function AdminPanel() {
         }
     }
 
+    async function handleDeleteWork(id) {
+        if (!window.confirm('Delete this work item? This cannot be undone.')) return;
+        try {
+            await api.delete(`/work/${id}`);
+            loadWork();
+        } catch (err) {
+            setWorkMessage(err.response?.data?.message || 'Failed to delete work item');
+        }
+    }
+
     async function handleSubmit(e) {
         e.preventDefault();
         setMessage('');
@@ -130,7 +168,6 @@ export default function AdminPanel() {
 
             let finalImageUrl = imageUrl;
 
-            // Only upload if a new file was chosen
             if (imageFile) {
                 const formData = new FormData();
                 formData.append('image', imageFile);
@@ -171,16 +208,47 @@ export default function AdminPanel() {
         }
     }
 
-    // Wait for auth check to finish before deciding to redirect
+    async function handleWorkSubmit(e) {
+        e.preventDefault();
+        setWorkMessage('');
+
+        if (!workImageFile) {
+            setWorkMessage('Please choose an image.');
+            return;
+        }
+
+        try {
+            setWorkUploading(true);
+
+            const formData = new FormData();
+            formData.append('image', workImageFile);
+            const uploadRes = await api.post('/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            await api.post('/work', {
+                title: workTitle,
+                imageUrl: uploadRes.data.imageUrl,
+                description: workDescription
+            });
+
+            setWorkMessage('Work item added.');
+            resetWorkForm();
+            loadWork();
+        } catch (err) {
+            setWorkMessage(err.response?.data?.message || 'Something went wrong');
+        } finally {
+            setWorkUploading(false);
+        }
+    }
+
     if (loading) return null;
     if (!user || user.role !== 'admin') return <Navigate to="/" replace />;
 
     return (
         <div className="max-w-6xl mx-auto px-6 py-12 flex gap-8">
-            {/* Sidebar */}
             <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-            {/* Main content */}
             <div className="flex-1 space-y-12">
                 {activeTab === 'add' && (
                     <section>
@@ -293,6 +361,83 @@ export default function AdminPanel() {
                                 ))}
                             </div>
                         )}
+                    </section>
+                )}
+
+                {activeTab === 'ourwork' && (
+                    <section className="space-y-8">
+                        <div>
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4">Add Work Item</h2>
+                            {workMessage && (
+                                <p className="mb-4 text-sm text-slate-700 bg-slate-100 px-4 py-2 rounded-lg">{workMessage}</p>
+                            )}
+                            <form onSubmit={handleWorkSubmit} className="space-y-4">
+                                <input
+                                    type="text" placeholder="Title (e.g. Software Developer CV)" value={workTitle}
+                                    onChange={(e) => setWorkTitle(e.target.value)} required
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                                />
+                                <textarea
+                                    placeholder="Short description (optional)" value={workDescription}
+                                    onChange={(e) => setWorkDescription(e.target.value)} rows={2}
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                                />
+                                <div>
+                                    <label className="block text-sm text-slate-600 mb-1">Work Image</label>
+                                    <input
+                                        type="file" accept="image/*"
+                                        onChange={handleWorkFileChange}
+                                        className="w-full border border-slate-300 rounded-lg px-4 py-2 bg-white"
+                                    />
+                                    {workImagePreview && (
+                                        <img
+                                            src={workImagePreview}
+                                            alt="Preview"
+                                            className="mt-3 w-40 h-40 object-cover rounded-lg border border-slate-200"
+                                        />
+                                    )}
+                                </div>
+                                <button
+                                    type="submit" disabled={workUploading}
+                                    className="bg-slate-800 text-white px-6 py-2 rounded-lg hover:bg-slate-700 disabled:opacity-50"
+                                >
+                                    {workUploading ? 'Saving...' : 'Add Work Item'}
+                                </button>
+                            </form>
+                        </div>
+
+                        <hr className="border-slate-100" />
+
+                        <div>
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4">Posted Work</h2>
+                            {workItems.length === 0 ? (
+                                <p className="text-slate-500">No work items added yet.</p>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {workItems.map((w) => (
+                                        <div key={w._id} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                                            <img
+                                                src={w.imageUrl}
+                                                alt={w.title}
+                                                className="w-full h-56 object-cover bg-slate-100"
+                                            />
+                                            <div className="p-4">
+                                                <h3 className="font-semibold text-slate-800">{w.title}</h3>
+                                                {w.description && (
+                                                    <p className="text-sm text-slate-500 mt-1 mb-3">{w.description}</p>
+                                                )}
+                                                <button
+                                                    onClick={() => handleDeleteWork(w._id)}
+                                                    className="text-sm px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </section>
                 )}
 

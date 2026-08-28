@@ -3,6 +3,7 @@ import React from 'react';
 const TABS = [
     { key: 'add', label: 'Add Template' },
     { key: 'templates', label: 'Templates' },
+    { key: 'ourwork', label: 'Our Work' },
     { key: 'bookings', label: 'Bookings' },
     { key: 'testimonials', label: 'Testimonials' }
 ];

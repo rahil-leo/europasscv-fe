@@ -5,6 +5,7 @@ import TemplateCard from "../components/TemplateCard";
 
 function Home() {
   const [featuredTemplates, setFeaturedTemplates] = useState([]);
+  const [ourWork, setOurWork] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -16,6 +17,14 @@ function Home() {
         }
       })
       .catch((err) => console.error("Failed to load templates:", err));
+
+    api.get("/work")
+      .then((res) => {
+        if (isMounted) {
+          setOurWork(res.data.slice(0, 3));
+        }
+      })
+      .catch((err) => console.error("Failed to load work:", err));
 
     return () => {
       isMounted = false;
@@ -121,6 +130,27 @@ function Home() {
             </div>
           </div>
         </section>
+
+        {ourWork.length > 0 && (
+    <section className="mt-6 py-16 px-4 max-w-6xl mx-auto">
+        <h2 className="text-2xl font-semibold text-center mb-10 text-white">Our Work</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {ourWork.map((w) => (
+                <div key={w._id} className="bg-white rounded-xl overflow-hidden shadow-sm">
+                    <img src={w.imageUrl} alt={w.title} className="w-full h-auto object-contain" loading="lazy" />
+                    <div className="p-3">
+                        <p className="font-medium">{w.title}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
+        <div className="text-center mt-10">
+            <Link to="/our-work" className="inline-block bg-slate-800 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-700 transition">
+                Show More
+            </Link>
+        </div>
+    </section>
+)}
       </div>
     </div>
   );
