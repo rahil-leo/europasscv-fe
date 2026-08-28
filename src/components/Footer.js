@@ -29,7 +29,7 @@ export default function Footer() {
                         Follow us for template previews, tips, and updates.
                     </p>
                     <a
-                        href="https://www.instagram.com/europass_ats?igsh=ZTRpdjVxYm4xMmt2"
+                        href="https://www.instagram.com/eurocvstudio?igsh=ZTRpdjVxYm4xMmt2"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white"
