@@ -1,37 +1,73 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 export default function Navbar() {
-    const { user, logout } = useContext(AuthContext);
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
+    const { user, logout, profileComplete } = useContext(AuthContext);
+    const navigate  = useNavigate();
+    const location  = useLocation();
+    const [menuOpen,    setMenuOpen]    = useState(false);
+    const [avatarOpen,  setAvatarOpen]  = useState(false);
+    const [scrolled,    setScrolled]    = useState(false);
+    const avatarRef = useRef(null);
 
     useEffect(() => {
-        function handleScroll() {
-            setScrolled(window.scrollY > 10);
-        }
+        function handleScroll() { setScrolled(window.scrollY > 10); }
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Close avatar dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (avatarRef.current && !avatarRef.current.contains(e.target)) {
+                setAvatarOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     function handleLogout() {
         logout();
         navigate('/');
         setMenuOpen(false);
+        setAvatarOpen(false);
     }
 
-    function closeMenu() {
-        setMenuOpen(false);
-    }
+    function closeMenu() { setMenuOpen(false); }
 
     function navLinkClass(path) {
         const isActive = location.pathname === path;
         return isActive
             ? 'text-slate-900 font-semibold border-b-2 border-slate-800'
             : 'text-slate-600 hover:text-slate-900';
+    }
+
+    // Avatar circle: shows photo if set, otherwise user initials
+    function AvatarCircle({ size = 'h-9 w-9' }) {
+        const initials = user?.name
+            ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+            : '?';
+        return (
+            <div className="relative inline-block">
+                {user?.avatar ? (
+                    <img
+                        src={user.avatar}
+                        alt="Profile"
+                        className={`${size} rounded-full object-cover border-2 border-slate-300`}
+                    />
+                ) : (
+                    <div className={`${size} rounded-full bg-slate-700 text-white flex items-center justify-center text-sm font-semibold border-2 border-slate-300`}>
+                        {initials}
+                    </div>
+                )}
+                {/* Amber dot when profile is incomplete */}
+                {!profileComplete && (
+                    <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-amber-400 border-2 border-white" title="Profile incomplete" />
+                )}
+            </div>
+        );
     }
 
     return (
@@ -46,9 +82,9 @@ export default function Navbar() {
 
                 {/* Desktop links */}
                 <div className="hidden md:flex items-center gap-4">
-                    <Link to="/" className={navLinkClass('/')}>Home</Link>
+                    <Link to="/"          className={navLinkClass('/')}>Home</Link>
                     <Link to="/templates" className={navLinkClass('/templates')}>Templates</Link>
-                    <Link to="/our-work" className={navLinkClass('/our-work')}>Our Work</Link>
+                    <Link to="/our-work"  className={navLinkClass('/our-work')}>Our Work</Link>
                     {user && (
                         <Link to="/my-bookings" className={navLinkClass('/my-bookings')}>My Bookings</Link>
                     )}
@@ -56,10 +92,47 @@ export default function Navbar() {
                     {user?.role === 'admin' && (
                         <Link to="/admin" className={navLinkClass('/admin')}>Admin Panel</Link>
                     )}
+
                     {user ? (
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm text-slate-500">Hi, {user.name}</span>
-                            <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-700">Logout</button>
+                        /* ── Avatar dropdown ── */
+                        <div className="relative" ref={avatarRef}>
+                            <button
+                                onClick={() => setAvatarOpen((prev) => !prev)}
+                                className="flex items-center gap-2 focus:outline-none"
+                                aria-label="Account menu"
+                            >
+                                <AvatarCircle />
+                                <span className="text-sm text-slate-600 max-w-[110px] truncate">{user.name}</span>
+                            </button>
+
+                            {avatarOpen && (
+                                <div className="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50">
+                                    <Link
+                                        to="/profile"
+                                        onClick={() => setAvatarOpen(false)}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                                    >
+                                        <span>👤</span> My Profile
+                                        {!profileComplete && (
+                                            <span className="ml-auto h-2 w-2 rounded-full bg-amber-400" />
+                                        )}
+                                    </Link>
+                                    <Link
+                                        to="/my-bookings"
+                                        onClick={() => setAvatarOpen(false)}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                                    >
+                                        <span>📋</span> My Bookings
+                                    </Link>
+                                    <hr className="my-1 border-slate-100" />
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50"
+                                    >
+                                        <span>🚪</span> Logout
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <Link to="/login" className="bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700">
@@ -85,22 +158,36 @@ export default function Navbar() {
                     )}
                 </button>
             </div>
+
             {/* Mobile dropdown menu */}
             {menuOpen && (
                 <div className="md:hidden mt-4 flex flex-col gap-3 pb-2">
-                    <Link to="/" onClick={closeMenu} className={navLinkClass('/')}>Home</Link>
+                    <Link to="/"          onClick={closeMenu} className={navLinkClass('/')}>Home</Link>
                     <Link to="/templates" onClick={closeMenu} className={navLinkClass('/templates')}>Templates</Link>
-                    <Link to="/our-work" onClick={closeMenu} className={navLinkClass('/our-work')}>Our Work</Link>
+                    <Link to="/our-work"  onClick={closeMenu} className={navLinkClass('/our-work')}>Our Work</Link>
                     {user && (
                         <Link to="/my-bookings" onClick={closeMenu} className={navLinkClass('/my-bookings')}>My Bookings</Link>
                     )}
-                    <Link to="/feedback" onClick={closeMenu} className={navLinkClass('/feedback')}>Feedback</Link>
+                    <Link to="/feedback"  onClick={closeMenu} className={navLinkClass('/feedback')}>Feedback</Link>
                     {user?.role === 'admin' && (
                         <Link to="/admin" onClick={closeMenu} className={navLinkClass('/admin')}>Admin Panel</Link>
                     )}
                     {user ? (
                         <>
-                            <span className="text-sm text-slate-500">Hi, {user.name}</span>
+                            <div className="flex items-center gap-3 py-1">
+                                <AvatarCircle size="h-8 w-8" />
+                                <span className="text-sm text-slate-600">{user.name}</span>
+                            </div>
+                            <Link
+                                to="/profile"
+                                onClick={closeMenu}
+                                className="flex items-center gap-2 text-slate-700 text-sm"
+                            >
+                                👤 My Profile
+                                {!profileComplete && (
+                                    <span className="ml-1 text-xs text-amber-500 font-medium">● Incomplete</span>
+                                )}
+                            </Link>
                             <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-700 text-left">Logout</button>
                         </>
                     ) : (

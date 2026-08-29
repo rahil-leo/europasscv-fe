@@ -12,6 +12,8 @@ import MyBookings from './pages/MyBookings';
 import Feedback from './pages/Feedback';
 import WhatsAppButton from './components/WhatsAppButton';
 import OurWork from './pages/OurWork';
+import ProfilePage from './pages/ProfilePage';
+import ProfileIncompleteToast from './components/ProfileIncompleteToast';
 
 export default function App() {
     return (
@@ -19,17 +21,20 @@ export default function App() {
             <BrowserRouter>
                 <Navbar />
                 <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/templates" element={<Templates />} />
+                    <Route path="/"             element={<Home />} />
+                    <Route path="/templates"    element={<Templates />} />
                     <Route path="/templates/:id" element={<TemplateDetail />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/admin" element={<AdminPanel />} />
-                    <Route path="/my-bookings" element={<MyBookings />} />
-                    <Route path="/feedback" element={<Feedback />} />
-                    <Route path="/our-work" element={<OurWork />} />
+                    <Route path="/login"        element={<Login />} />
+                    <Route path="/admin"        element={<AdminPanel />} />
+                    <Route path="/my-bookings"  element={<MyBookings />} />
+                    <Route path="/feedback"     element={<Feedback />} />
+                    <Route path="/our-work"     element={<OurWork />} />
+                    <Route path="/profile"      element={<ProfilePage />} />
                 </Routes>
                 <Footer />
                 <WhatsAppButton />
+                {/* Shows only when logged in + profile incomplete */}
+                <ProfileIncompleteToast />
             </BrowserRouter>
         </AuthProvider>
     );

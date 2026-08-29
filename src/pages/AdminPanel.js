@@ -246,10 +246,10 @@ export default function AdminPanel() {
     if (!user || user.role !== 'admin') return <Navigate to="/" replace />;
 
     return (
-        <div className="max-w-6xl mx-auto px-6 py-12 flex gap-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 flex flex-col md:flex-row gap-6 md:gap-8">
             <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-            <div className="flex-1 space-y-12">
+            <div className="flex-1 space-y-12 min-w-0">
                 {activeTab === 'add' && (
                     <section>
                         <h2 className="text-xl font-semibold text-slate-800 mb-4">
@@ -447,45 +447,47 @@ export default function AdminPanel() {
                         {bookings.length === 0 ? (
                             <p className="text-slate-500">No bookings yet.</p>
                         ) : (
-                            <table className="w-full text-sm text-left border-collapse">
-                                <thead>
-                                    <tr className="border-b border-slate-200 text-slate-500">
-                                        <th className="py-2 pr-4">Template</th>
-                                        <th className="py-2 pr-4">User</th>
-                                        <th className="py-2 pr-4">Phone</th>
-                                        <th className="py-2 pr-4">Notes</th>
-                                        <th className="py-2 pr-4">Status</th>
-                                        <th className="py-2 pr-4">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {bookings.map((b) => (
-                                        <tr key={b._id} className="border-b border-slate-100">
-                                            <td className="py-2 pr-4">{b.template?.name}</td>
-                                            <td className="py-2 pr-4">{b.user?.name} ({b.user?.email})</td>
-                                            <td className="py-2 pr-4">{b.phone}</td>
-                                            <td className="py-2 pr-4">{b.notes || '-'}</td>
-                                            <td className="py-2 pr-4">
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                                                    b.status === 'done'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-yellow-100 text-yellow-800'
-                                                }`}>
-                                                    {b.status}
-                                                </span>
-                                            </td>
-                                            <td className="py-2 pr-4">
-                                                <button
-                                                    onClick={() => toggleBookingStatus(b._id)}
-                                                    className="text-xs px-2.5 py-1 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100"
-                                                >
-                                                    {b.status === 'done' ? 'Mark Pending' : 'Mark Done'}
-                                                </button>
-                                            </td>
+                            <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-slate-100">
+                                <table className="w-full text-sm text-left border-collapse min-w-[700px]">
+                                    <thead>
+                                        <tr className="border-b border-slate-200 text-slate-500 bg-slate-50">
+                                            <th className="py-3 px-4 font-medium">Template</th>
+                                            <th className="py-3 px-4 font-medium">User</th>
+                                            <th className="py-3 px-4 font-medium">Phone</th>
+                                            <th className="py-3 px-4 font-medium">Notes</th>
+                                            <th className="py-3 px-4 font-medium">Status</th>
+                                            <th className="py-3 px-4 font-medium">Actions</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {bookings.map((b) => (
+                                            <tr key={b._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                                                <td className="py-3 px-4">{b.template?.name}</td>
+                                                <td className="py-3 px-4">{b.user?.name} <span className="text-slate-400 block text-xs">({b.user?.email})</span></td>
+                                                <td className="py-3 px-4">{b.phone}</td>
+                                                <td className="py-3 px-4 truncate max-w-[150px]" title={b.notes}>{b.notes || '-'}</td>
+                                                <td className="py-3 px-4">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                        b.status === 'done'
+                                                            ? 'bg-green-100 text-green-800'
+                                                            : 'bg-yellow-100 text-yellow-800'
+                                                    }`}>
+                                                        {b.status}
+                                                    </span>
+                                                </td>
+                                                <td className="py-3 px-4">
+                                                    <button
+                                                        onClick={() => toggleBookingStatus(b._id)}
+                                                        className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-200 bg-white shadow-sm transition-colors"
+                                                    >
+                                                        {b.status === 'done' ? 'Mark Pending' : 'Mark Done'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </section>
                 )}
