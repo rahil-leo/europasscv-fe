@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
 
     // On app load, check if a token is already saved (already logged in)
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
             setLoading(false);
             return;
@@ -23,19 +23,19 @@ export function AuthProvider({ children }) {
         api.get('/auth/me')
             .then((res) => setUser(res.data.user))
             .catch(() => {
-                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
                 setUser(null);
             })
             .finally(() => setLoading(false));
     }, []);
 
     function login(token, userData) {
-        localStorage.setItem('token', token);
+        sessionStorage.setItem('token', token);
         setUser(userData);
     }
 
     function logout() {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         setUser(null);
     }
 

@@ -14,11 +14,13 @@ import WhatsAppButton from './components/WhatsAppButton';
 import OurWork from './pages/OurWork';
 import ProfilePage from './pages/ProfilePage';
 import ProfileIncompleteToast from './components/ProfileIncompleteToast';
+import MaintenanceBanner from './components/MaintenanceBanner';
 
 export default function App() {
     return (
         <AuthProvider>
-            <BrowserRouter>
+        <BrowserRouter>
+          <MaintenanceBanner />
                 <Navbar />
                 <Routes>
                     <Route path="/"             element={<Home />} />
