@@ -5,7 +5,8 @@ const TABS = [
     { key: 'templates', label: 'Templates' },
     { key: 'ourwork', label: 'Our Work' },
     { key: 'bookings', label: 'Bookings' },
-    { key: 'testimonials', label: 'Testimonials' }
+    { key: 'testimonials', label: 'Testimonials' },
+    { key: 'settings', label: 'Settings' }
 ];
 
 export default function AdminSidebar({ activeTab, onTabChange }) {
