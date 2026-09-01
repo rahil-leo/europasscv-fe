@@ -15,7 +15,9 @@ import OurWork from './pages/OurWork';
 import ProfilePage from './pages/ProfilePage';
 import ProfileIncompleteToast from './components/ProfileIncompleteToast';
 import MaintenanceBanner from './components/MaintenanceBanner';
+import ApplyJobs from './pages/ApplyJobs';
 import NotFound from './pages/NotFound';
+import AccessNoticeBanner from './components/AccessNoticeBanner';
 
 export default function App() {
     return (
@@ -23,6 +25,7 @@ export default function App() {
         <BrowserRouter>
           <MaintenanceBanner />
                 <Navbar />
+                <AccessNoticeBanner />
                 <Routes>
                     <Route path="/"             element={<Home />} />
                     <Route path="/templates"    element={<Templates />} />
@@ -33,6 +36,7 @@ export default function App() {
                     <Route path="/feedback"     element={<Feedback />} />
                     <Route path="/our-work"     element={<OurWork />} />
                     <Route path="/profile"      element={<ProfilePage />} />
+                    <Route path="/apply-jobs" element={<ApplyJobs />} />
                     <Route path="*"              element={<NotFound />} />
                 </Routes>
                 <Footer />

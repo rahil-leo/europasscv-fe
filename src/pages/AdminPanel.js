@@ -29,13 +29,21 @@ export default function AdminPanel() {
     const [workUploading, setWorkUploading] = useState(false);
     const [workMessage, setWorkMessage] = useState('');
 
+    // Job Portal form state
+    const [editingPortalId, setEditingPortalId] = useState(null);
+    const [portalName, setPortalName] = useState('');
+    const [portalUrl, setPortalUrl] = useState('');
+    const [portalCountry, setPortalCountry] = useState('');
+    const [portalDescription, setPortalDescription] = useState('');
+    const [portalMessage, setPortalMessage] = useState('');
+
     // Data lists
     const [templates, setTemplates] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [pendingTestimonials, setPendingTestimonials] = useState([]);
     const [approvedTestimonials, setApprovedTestimonials] = useState([]);
     const [workItems, setWorkItems] = useState([]);
-  
+    const [jobPortals, setJobPortals] = useState([]);
     const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
     const [maintenanceMessage, setMaintenanceMessage] = useState('');
     const [settingsMessage, setSettingsMessage] = useState('');
@@ -47,6 +55,7 @@ export default function AdminPanel() {
             loadTestimonials();
             loadSettings();
             loadWork();
+            loadJobPortals();
         }
     }, [user]);
 
@@ -61,6 +70,10 @@ export default function AdminPanel() {
 
     function loadWork() {
         api.get('/work').then((res) => setWorkItems(res.data));
+    }
+
+    function loadJobPortals() {
+        api.get('/job-portals').then((res) => setJobPortals(res.data));
     }
 
     async function handleApproveTestimonial(id) {
@@ -96,7 +109,7 @@ export default function AdminPanel() {
             alert(err.response?.data?.message || 'Failed to update booking status');
         }
     }
-      function loadSettings() {
+    function loadSettings() {
         api.get('/settings/maintenance').then((res) => {
             setMaintenanceEnabled(res.data.enabled);
             setMaintenanceMessage(res.data.message);
@@ -116,7 +129,6 @@ export default function AdminPanel() {
         setWorkImageFile(file);
         setWorkImagePreview(URL.createObjectURL(file));
     }
-
     function resetForm() {
         setEditingId(null);
         setName('');
@@ -135,6 +147,14 @@ export default function AdminPanel() {
         setWorkImagePreview('');
     }
 
+    function resetPortalForm() {
+        setEditingPortalId(null);
+        setPortalName('');
+        setPortalUrl('');
+        setPortalCountry('');
+        setPortalDescription('');
+    }
+
     function startEdit(t) {
         setEditingId(t._id);
         setName(t.name);
@@ -146,6 +166,16 @@ export default function AdminPanel() {
         setPrice(t.price || '');
         setMessage('');
         setActiveTab('add');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startEditPortal(p) {
+        setEditingPortalId(p._id);
+        setPortalName(p.name);
+        setPortalUrl(p.url);
+        setPortalCountry(p.country || '');
+        setPortalDescription(p.description || '');
+        setPortalMessage('');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -167,6 +197,17 @@ export default function AdminPanel() {
             loadWork();
         } catch (err) {
             setWorkMessage(err.response?.data?.message || 'Failed to delete work item');
+        }
+    }
+
+    async function handleDeletePortal(id) {
+        if (!window.confirm('Delete this job portal? This cannot be undone.')) return;
+        try {
+            await api.delete(`/job-portals/${id}`);
+            if (editingPortalId === id) resetPortalForm();
+            loadJobPortals();
+        } catch (err) {
+            setPortalMessage(err.response?.data?.message || 'Failed to delete job portal');
         }
     }
 
@@ -252,7 +293,34 @@ export default function AdminPanel() {
             setWorkUploading(false);
         }
     }
-  
+
+    async function handlePortalSubmit(e) {
+        e.preventDefault();
+        setPortalMessage('');
+
+        try {
+            const payload = {
+                name: portalName,
+                url: portalUrl,
+                country: portalCountry,
+                description: portalDescription
+            };
+
+            if (editingPortalId) {
+                await api.put(`/job-portals/${editingPortalId}`, payload);
+                setPortalMessage('Job portal updated.');
+            } else {
+                await api.post('/job-portals', payload);
+                setPortalMessage('Job portal added.');
+            }
+
+            resetPortalForm();
+            loadJobPortals();
+        } catch (err) {
+            setPortalMessage(err.response?.data?.message || 'Something went wrong');
+        }
+    }
+
     async function handleToggleMaintenance() {
         try {
             const newEnabled = !maintenanceEnabled;
@@ -472,6 +540,93 @@ export default function AdminPanel() {
                     </section>
                 )}
 
+                {activeTab === 'jobportals' && (
+                    <section className="space-y-8">
+                        <div>
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4">
+                                {editingPortalId ? 'Edit Job Portal' : 'Add Job Portal'}
+                            </h2>
+                            {portalMessage && (
+                                <p className="mb-4 text-sm text-slate-700 bg-slate-100 px-4 py-2 rounded-lg">{portalMessage}</p>
+                            )}
+                            <form onSubmit={handlePortalSubmit} className="space-y-4">
+                                <input
+                                    type="text" placeholder="Portal name (e.g. LinkedIn Jobs)" value={portalName}
+                                    onChange={(e) => setPortalName(e.target.value)} required
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                                />
+                                <input
+                                    type="url" placeholder="URL (e.g. https://linkedin.com/jobs)" value={portalUrl}
+                                    onChange={(e) => setPortalUrl(e.target.value)} required
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                                />
+                                <input
+                                    type="text" placeholder="Country (optional, e.g. Germany)" value={portalCountry}
+                                    onChange={(e) => setPortalCountry(e.target.value)}
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                                />
+                                <textarea
+                                    placeholder="Short note (optional)" value={portalDescription}
+                                    onChange={(e) => setPortalDescription(e.target.value)} rows={2}
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                                />
+                                <div className="flex gap-3">
+                                    <button
+                                        type="submit"
+                                        className="bg-slate-800 text-white px-6 py-2 rounded-lg hover:bg-slate-700"
+                                    >
+                                        {editingPortalId ? 'Update Portal' : 'Add Portal'}
+                                    </button>
+                                    {editingPortalId && (
+                                        <button
+                                            type="button"
+                                            onClick={resetPortalForm}
+                                            className="px-6 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100"
+                                        >
+                                            Cancel
+                                        </button>
+                                    )}
+                                </div>
+                            </form>
+                        </div>
+
+                        <hr className="border-slate-100" />
+
+                        <div>
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4">Added Portals</h2>
+                            {jobPortals.length === 0 ? (
+                                <p className="text-slate-500">No job portals added yet.</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {jobPortals.map((p) => (
+                                        <div key={p._id} className="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex items-center justify-between gap-4">
+                                            <div>
+                                                <p className="font-medium text-slate-800">{p.name}</p>
+                                                {p.country && <p className="text-xs text-slate-400">{p.country}</p>}
+                                                <p className="text-xs text-slate-400 truncate max-w-xs">{p.url}</p>
+                                            </div>
+                                            <div className="flex gap-2 shrink-0">
+                                                <button
+                                                    onClick={() => startEditPortal(p)}
+                                                    className="text-sm px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeletePortal(p._id)}
+                                                    className="text-sm px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                )}
+
                 {activeTab === 'bookings' && (
                     <section>
                         <h2 className="text-xl font-semibold text-slate-800 mb-4">Bookings</h2>
@@ -594,49 +749,50 @@ export default function AdminPanel() {
                         </div>
                     </section>
                 )}
-        </div>
-        {activeTab === 'settings' && (
-            <section>
-                <h2 className="text-xl font-semibold text-slate-800 mb-4">Site Settings</h2>
-                {settingsMessage && (
-                    <p className="mb-4 text-sm text-slate-700 bg-slate-100 px-4 py-2 rounded-lg">{settingsMessage}</p>
-                )}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="font-medium text-slate-800">Maintenance Mode</p>
-                            <p className="text-sm text-slate-500">Shows a full-screen notice to visitors when enabled.</p>
-                        </div>
-                        <button
-                            onClick={handleToggleMaintenance}
-                            className={`relative inline-flex h-7 w-12 items-center rounded-full transition ${
-                                maintenanceEnabled ? 'bg-slate-800' : 'bg-slate-300'
-                            }`}
-                        >
-                            <span
-                                className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
-                                    maintenanceEnabled ? 'translate-x-6' : 'translate-x-1'
-                                }`}
-                            />
-                        </button>
-                    </div>
 
-                    <textarea
-                        value={maintenanceMessage}
-                        onChange={(e) => setMaintenanceMessage(e.target.value)}
-                        rows={3}
-                        placeholder="Message shown to visitors during maintenance"
-                        className="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm"
-                    />
-                    <button
-                        onClick={handleSaveMessage}
-                        className="text-sm px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100"
-                    >
-                        Save Message
-                    </button>
-                </div>
-            </section>
-        )}
+                {activeTab === 'settings' && (
+                    <section>
+                        <h2 className="text-xl font-semibold text-slate-800 mb-4">Site Settings</h2>
+                        {settingsMessage && (
+                            <p className="mb-4 text-sm text-slate-700 bg-slate-100 px-4 py-2 rounded-lg">{settingsMessage}</p>
+                        )}
+                        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-medium text-slate-800">Maintenance Mode</p>
+                                    <p className="text-sm text-slate-500">Shows a full-screen notice to visitors when enabled.</p>
+                                </div>
+                                <button
+                                    onClick={handleToggleMaintenance}
+                                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition ${
+                                        maintenanceEnabled ? 'bg-slate-800' : 'bg-slate-300'
+                                    }`}
+                                >
+                                    <span
+                                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
+                                            maintenanceEnabled ? 'translate-x-6' : 'translate-x-1'
+                                        }`}
+                                    />
+                                </button>
+                            </div>
+
+                            <textarea
+                                value={maintenanceMessage}
+                                onChange={(e) => setMaintenanceMessage(e.target.value)}
+                                rows={3}
+                                placeholder="Message shown to visitors during maintenance"
+                                className="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm"
+                            />
+                            <button
+                                onClick={handleSaveMessage}
+                                className="text-sm px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100"
+                            >
+                                Save Message
+                            </button>
+                        </div>
+                    </section>
+                )}
+            </div>
         </div>
     );
 }
