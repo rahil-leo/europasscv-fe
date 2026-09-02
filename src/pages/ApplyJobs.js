@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api/api';
 import Disclosure from '../components/Disclosure';
 import LanguageToggle from '../components/LanguageToggle';
+import SearchBar from '../components/SearchBar';
 
 const ACCESS_PASSWORD = 'eurocvstudio@2830'; // change this to whatever you want to share with clients
 
@@ -14,13 +15,24 @@ export default function ApplyJobs() {
     const [error, setError] = useState('');
     const [pendingUrl, setPendingUrl] = useState(null);
     const [language, setLanguage] = useState('en');
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        api.get('/job-portals').then((res) => setPortals(res.data)).finally(() => setLoading(false));
+        loadPortals(searchQuery);
+    }, [searchQuery]);
+
+    useEffect(() => {
         if (sessionStorage.getItem('jobPortalUnlocked') === 'true') {
             setUnlocked(true);
         }
     }, []);
+
+    function loadPortals(search) {
+        setLoading(true);
+        api.get('/job-portals', { params: search ? { search } : {} })
+            .then((res) => setPortals(res.data))
+            .finally(() => setLoading(false));
+    }
 
     function handleApplyClick(url) {
         if (unlocked) {
@@ -87,15 +99,19 @@ export default function ApplyJobs() {
                   </>
               )}
           </Disclosure>
-            <h1 className="text-2xl font-semibold text-slate-800 mb-2">Apply for Jobs</h1>
-            <p className="text-slate-500 mb-8">
+            <h1 className="text-2xl font-semibold text-slate-800 mb-2 mt-8">Apply for Jobs</h1>
+            <p className="text-slate-500 mb-4">
                 A curated list of job portals to apply directly. This section is exclusively for clients who've booked a Europass CV with us — enter your access password to unlock the links.
             </p>
+
+            <div className="mb-6 max-w-xs ml-auto">
+                <SearchBar placeholder="Search by name or country..." onSearch={setSearchQuery} />
+            </div>
 
             {loading ? (
                 <p className="text-slate-500">Loading...</p>
             ) : portals.length === 0 ? (
-                <p className="text-slate-500">No job portals added yet.</p>
+                <p className="text-slate-500">No job portals found.</p>
             ) : (
                 <div className="space-y-3">
                     {portals.map((p) => (
@@ -117,36 +133,36 @@ export default function ApplyJobs() {
             )}
 
             {showPasswordPrompt && (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center px-6" onClick={() => setShowPasswordPrompt(false)}>
-        <div className="bg-white rounded-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
-            <button
-                onClick={() => setShowPasswordPrompt(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl leading-none"
-                aria-label="Close"
-            >
-                ✕
-            </button>
-            <h3 className="font-semibold text-slate-800 mb-2 pr-6">Access Required</h3>
-            <p className="text-sm text-slate-500 mb-4">
-                This link is exclusively for those holding a Europass CV from EuroCVStudio. Enter the password we provided you.
-            </p>
-            {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
-            <form onSubmit={handleVerify} className="space-y-3">
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Access password"
-                    required
-                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
-                />
-                <button type="submit" className="w-full bg-slate-800 text-white py-2 rounded-lg hover:bg-slate-700">
-                    Unlock
-                </button>
-            </form>
-        </div>
-    </div>
-)}
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center px-6" onClick={() => setShowPasswordPrompt(false)}>
+                    <div className="bg-white rounded-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={() => setShowPasswordPrompt(false)}
+                            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl leading-none"
+                            aria-label="Close"
+                        >
+                            ✕
+                        </button>
+                        <h3 className="font-semibold text-slate-800 mb-2 pr-6">Access Required</h3>
+                        <p className="text-sm text-slate-500 mb-4">
+                            This link is exclusively for those holding a Europass CV from EuroCVStudio. Enter the password we provided you.
+                        </p>
+                        {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+                        <form onSubmit={handleVerify} className="space-y-3">
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Access password"
+                                required
+                                className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                            />
+                            <button type="submit" className="w-full bg-slate-800 text-white py-2 rounded-lg hover:bg-slate-700">
+                                Unlock
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
