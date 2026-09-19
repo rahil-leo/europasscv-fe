@@ -1,13 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ChatToggleButton, { ChatWindow } from './Chatbot';
 
 export default function WhatsAppButton() {
+    const [chatOpen, setChatOpen] = useState(false);
+
     return (
-        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+        // Single fixed container on the bottom-right for ALL floating buttons
+        <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-50">
+
+            {/* Chat window pops up above the buttons when open */}
+            {chatOpen && <ChatWindow onClose={() => setChatOpen(false)} />}
+
+            {/* AI Chat Button */}
+            <ChatToggleButton isOpen={chatOpen} onToggle={() => setChatOpen(!chatOpen)} />
+
+            {/* Instagram */}
             <a
                 href="https://www.instagram.com/eurocvstudio?igsh=ZTRpdjVxYm4xMmt2"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 hover:opacity-90 text-white rounded-full p-4 shadow-lg"
+                className="bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 hover:opacity-90 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-110"
                 aria-label="Follow us on Instagram"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -15,11 +27,12 @@ export default function WhatsAppButton() {
                 </svg>
             </a>
 
+            {/* WhatsApp */}
             <a
                 href="https://chat.whatsapp.com/JWN7AThOU7t1lDMcHOLp4k?s=sh&p=a&ilr=0"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg"
+                className="bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-110"
                 aria-label="Join our WhatsApp group"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
