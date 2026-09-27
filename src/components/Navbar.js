@@ -87,7 +87,10 @@ export default function Navbar() {
                     <Link to="/our-work"   className={navLinkClass('/our-work')}>Our Work</Link>
                     <Link to="/apply-jobs" className={navLinkClass('/apply-jobs')}>Apply for Jobs</Link>
                     {user && (
-                        <Link to="/my-bookings" className={navLinkClass('/my-bookings')}>My Bookings</Link>
+                        <>
+                            <Link to="/my-bookings" className={navLinkClass('/my-bookings')}>My Bookings</Link>
+                            <Link to="/wishlist" className={navLinkClass('/wishlist')}>My Wishlist</Link>
+                        </>
                     )}
                     <Link to="/feedback" className={navLinkClass('/feedback')}>Feedback</Link>
                     {user?.role === 'admin' && (
@@ -189,6 +192,13 @@ export default function Navbar() {
                                 {!profileComplete && (
                                     <span className="ml-1 text-xs text-amber-500 font-medium">● Incomplete</span>
                                 )}
+                            </Link>
+                            <Link
+                                to="/wishlist"
+                                onClick={closeMenu}
+                                className="flex items-center gap-2 text-slate-700 text-sm"
+                            >
+                                🤍 My Wishlist
                             </Link>
                             <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-700 text-left">Logout</button>
                         </>

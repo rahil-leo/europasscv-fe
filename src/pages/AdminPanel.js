@@ -44,9 +44,18 @@ export default function AdminPanel() {
     const [approvedTestimonials, setApprovedTestimonials] = useState([]);
     const [workItems, setWorkItems] = useState([]);
     const [jobPortals, setJobPortals] = useState([]);
+    const [promoCodes, setPromoCodes] = useState([]);
     const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
     const [maintenanceMessage, setMaintenanceMessage] = useState('');
     const [settingsMessage, setSettingsMessage] = useState('');
+
+    // Promo Form State
+    const [promoCode, setPromoCode] = useState('');
+    const [promoType, setPromoType] = useState('percentage');
+    const [promoValue, setPromoValue] = useState('');
+    const [promoMaxUses, setPromoMaxUses] = useState('');
+    const [promoMessage, setPromoMessage] = useState('');
+    const [promoCreating, setPromoCreating] = useState(false);
 
     useEffect(() => {
         if (user?.role === 'admin') {
@@ -56,8 +65,13 @@ export default function AdminPanel() {
             loadSettings();
             loadWork();
             loadJobPortals();
+            loadPromoCodes();
         }
     }, [user]);
+
+    function loadPromoCodes() {
+        api.get('/promos').then(res => setPromoCodes(res.data));
+    }
 
     function loadTemplates() {
         api.get('/templates').then((res) => setTemplates(res.data));
@@ -338,6 +352,38 @@ export default function AdminPanel() {
             setSettingsMessage('Message updated.');
         } catch (err) {
             setSettingsMessage('Failed to update message.');
+        }
+    }
+
+    async function handlePromoSubmit(e) {
+        e.preventDefault();
+        setPromoMessage('');
+        try {
+            setPromoCreating(true);
+            await api.post('/promos', {
+                code: promoCode,
+                discountType: promoType,
+                discountValue: Number(promoValue),
+                maxUses: Number(promoMaxUses) || 0
+            });
+            setPromoMessage('Promo code created successfully!');
+            setPromoCode('');
+            setPromoValue('');
+            setPromoMaxUses('');
+            loadPromoCodes();
+        } catch (err) {
+            setPromoMessage(err.response?.data?.message || 'Failed to create promo code');
+        } finally {
+            setPromoCreating(false);
+        }
+    }
+
+    async function handleTogglePromo(id) {
+        try {
+            await api.patch(`/promos/${id}/toggle`);
+            loadPromoCodes();
+        } catch (err) {
+            alert('Failed to toggle promo code');
         }
     }
 
@@ -675,6 +721,88 @@ export default function AdminPanel() {
                                 </table>
                             </div>
                         )}
+                    </section>
+                )}
+
+                {activeTab === 'promos' && (
+                    <section className="space-y-8">
+                        <div>
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4">Create Promo Code</h2>
+                            {promoMessage && (
+                                <p className="mb-4 text-sm text-slate-700 bg-slate-100 px-4 py-2 rounded-lg">{promoMessage}</p>
+                            )}
+                            <form onSubmit={handlePromoSubmit} className="space-y-4">
+                                <input
+                                    type="text" placeholder="Promo Code (e.g. WELCOME20)" value={promoCode}
+                                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())} required
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2 uppercase"
+                                />
+                                <div className="flex gap-4">
+                                    <select
+                                        value={promoType}
+                                        onChange={(e) => setPromoType(e.target.value)}
+                                        className="border border-slate-300 rounded-lg px-4 py-2 bg-white"
+                                    >
+                                        <option value="percentage">Percentage (%)</option>
+                                        <option value="flat">Flat Amount (₹)</option>
+                                    </select>
+                                    <input
+                                        type="number" placeholder={promoType === 'percentage' ? "Discount (e.g. 20)" : "Discount (e.g. 200)"} value={promoValue}
+                                        onChange={(e) => setPromoValue(e.target.value)} required min="1"
+                                        className="flex-1 border border-slate-300 rounded-lg px-4 py-2"
+                                    />
+                                </div>
+                                <input
+                                    type="number" placeholder="Max uses (leave blank for unlimited)" value={promoMaxUses}
+                                    onChange={(e) => setPromoMaxUses(e.target.value)} min="0"
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                                />
+                                <button
+                                    type="submit" disabled={promoCreating}
+                                    className="bg-slate-800 text-white px-6 py-2 rounded-lg hover:bg-slate-700 disabled:opacity-50"
+                                >
+                                    {promoCreating ? 'Creating...' : 'Create Promo Code'}
+                                </button>
+                            </form>
+                        </div>
+
+                        <hr className="border-slate-100" />
+
+                        <div>
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4">Active Promo Codes</h2>
+                            {promoCodes.length === 0 ? (
+                                <p className="text-slate-500">No promo codes created yet.</p>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {promoCodes.map((p) => (
+                                        <div key={p._id} className={`bg-white rounded-xl p-5 shadow-sm border ${p.isActive ? 'border-green-200' : 'border-slate-200 opacity-60'} flex flex-col justify-between`}>
+                                            <div>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <h3 className="font-bold text-lg text-slate-800 tracking-wide">{p.code}</h3>
+                                                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${p.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                        {p.isActive ? 'ACTIVE' : 'INACTIVE'}
+                                                    </span>
+                                                </div>
+                                                <p className="text-slate-600 mb-1">
+                                                    Discount: <strong>{p.discountType === 'percentage' ? `${p.discountValue}%` : `₹${p.discountValue}`}</strong>
+                                                </p>
+                                                <p className="text-sm text-slate-500">
+                                                    Uses: {p.currentUses} {p.maxUses > 0 ? `/ ${p.maxUses}` : '(Unlimited)'}
+                                                </p>
+                                            </div>
+                                            <div className="mt-4 pt-4 border-t border-slate-100 text-right">
+                                                <button
+                                                    onClick={() => handleTogglePromo(p._id)}
+                                                    className="text-sm px-4 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 font-medium"
+                                                >
+                                                    {p.isActive ? 'Deactivate' : 'Activate'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </section>
                 )}
 

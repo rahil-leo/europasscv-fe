@@ -5,6 +5,7 @@ const TABS = [
     { key: 'templates', label: 'Templates' },
     { key: 'ourwork', label: 'Our Work' },
     { key: 'bookings', label: 'Bookings' },
+    { key: 'promos', label: 'Promo Codes' },
     { key: 'jobportals', label: 'Job Portals' },
     { key: 'testimonials', label: 'Testimonials' },
     { key: 'settings', label: 'Settings' }

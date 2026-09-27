@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { WishlistProvider } from './context/WishlistContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from "./pages/Home";
@@ -13,6 +14,7 @@ import Feedback from './pages/Feedback';
 import WhatsAppButton from './components/WhatsAppButton';
 import OurWork from './pages/OurWork';
 import ProfilePage from './pages/ProfilePage';
+import WishlistPage from './pages/WishlistPage';
 import ProfileIncompleteToast from './components/ProfileIncompleteToast';
 import MaintenanceBanner from './components/MaintenanceBanner';
 import ApplyJobs from './pages/ApplyJobs';
@@ -22,28 +24,31 @@ import AccessNoticeBanner from './components/AccessNoticeBanner';
 export default function App() {
     return (
         <AuthProvider>
-        <BrowserRouter>
-          <MaintenanceBanner />
-                <Navbar />
-                <AccessNoticeBanner />
-                <Routes>
-                    <Route path="/"             element={<Home />} />
-                    <Route path="/templates"    element={<Templates />} />
-                    <Route path="/templates/:id" element={<TemplateDetail />} />
-                    <Route path="/login"        element={<Login />} />
-                    <Route path="/admin"        element={<AdminPanel />} />
-                    <Route path="/my-bookings"  element={<MyBookings />} />
-                    <Route path="/feedback"     element={<Feedback />} />
-                    <Route path="/our-work"     element={<OurWork />} />
-                    <Route path="/profile"      element={<ProfilePage />} />
-                    <Route path="/apply-jobs" element={<ApplyJobs />} />
-                    <Route path="*"              element={<NotFound />} />
-                </Routes>
-                <Footer />
-                <WhatsAppButton />
-                {/* Shows only when logged in + profile incomplete */}
-                <ProfileIncompleteToast />
-            </BrowserRouter>
+            <WishlistProvider>
+                <BrowserRouter>
+                    <MaintenanceBanner />
+                    <Navbar />
+                    <AccessNoticeBanner />
+                    <Routes>
+                        <Route path="/"              element={<Home />} />
+                        <Route path="/templates"     element={<Templates />} />
+                        <Route path="/templates/:id" element={<TemplateDetail />} />
+                        <Route path="/login"         element={<Login />} />
+                        <Route path="/admin"         element={<AdminPanel />} />
+                        <Route path="/my-bookings"   element={<MyBookings />} />
+                        <Route path="/feedback"      element={<Feedback />} />
+                        <Route path="/our-work"      element={<OurWork />} />
+                        <Route path="/profile"       element={<ProfilePage />} />
+                        <Route path="/wishlist"      element={<WishlistPage />} />
+                        <Route path="/apply-jobs"    element={<ApplyJobs />} />
+                        <Route path="*"              element={<NotFound />} />
+                    </Routes>
+                    <Footer />
+                    <WhatsAppButton />
+                    {/* Shows only when logged in + profile incomplete */}
+                    <ProfileIncompleteToast />
+                </BrowserRouter>
+            </WishlistProvider>
         </AuthProvider>
     );
 }
