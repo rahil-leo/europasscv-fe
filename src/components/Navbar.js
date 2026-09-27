@@ -76,7 +76,7 @@ export default function Navbar() {
         }`}>
             <div className="flex items-center justify-between">
                 <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
-                    <img src="/images/Logo.png" alt="Logo" className="h-8 w-auto rounded" />
+                    <img src="/images/Logo.png" alt="Logo" className="h-9 w-9 rounded-full object-cover" />
                     <span className="text-xl font-bold text-slate-800">Europass.cv</span>
                 </Link>
 
